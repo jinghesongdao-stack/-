@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>道路維持出勤簿</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#e9ecef;--paper:#fff;--ink:#1d2329;--sub:#5f6b76;--line:#9aa5b1;--we:#c9ced4;--acc:#f2b705;--accink:#1d2329;--stamp:#d1242f;--in:#1f7a4d;--out:#b4462b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181c;--paper:#20262c;--ink:#e8ebee;--sub:#9aa5b1;--line:#4a545e;--we:#333b43;--stamp:#ff6b73;--in:#4cc38a;--out:#ff8a6b}}
+:root[data-theme="dark"]{--bg:#14181c;--paper:#20262c;--ink:#e8ebee;--sub:#9aa5b1;--line:#4a545e;--we:#333b43;--stamp:#ff6b73;--in:#4cc38a;--out:#ff8a6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif}
+main{max-width:860px;margin:0 auto;padding:12px}
+.punch{background:var(--ink);color:var(--paper);border-radius:6px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;border-left:10px solid var(--acc)}
+.app{flex-basis:100%;font-weight:700;font-size:15px;letter-spacing:.08em}.clock{flex:1 1 180px}
+.clock b{display:block;font-size:40px;line-height:1.1;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.clock span{font-size:13px;opacity:.75}
+.btns{display:flex;gap:10px;flex:1 1 260px}
+.btns button{flex:1;min-height:56px;font-size:18px;font-weight:700;border:0;border-radius:6px;cursor:pointer;color:#fff}
+#bwater{background:#1f5fd1}#bkeep{background:#1a9c4f}#bokeep{background:#d62828}#bowater{background:#1f5fd1}#boback,#bback{background:#5f6b76;flex:0 0 76px;font-size:15px}#bin{background:#1a9c4f}#bout{background:#d62828}#bot{background:#f2b705;color:#1d2329}.btns button[hidden]{display:none}.btns button small{display:block;font-size:13px;font-weight:400;opacity:.9}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.msg{flex-basis:100%;font-size:13px;min-height:1.4em;opacity:.85}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 8px}
+.bar select,.bar input,.bar button{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink)}
+.bar button{cursor:pointer}
+.bar .sp{flex:1}
+.sheet{background:var(--paper);border:1px solid var(--line);padding:14px 14px 10px}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.head h1{margin:0;font-size:26px;letter-spacing:.5em;font-weight:500}
+.head .m{font-size:22px}
+.head input{font:inherit;font-size:17px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);width:8em;text-align:center}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:700px;font-size:14px}
+th,td{border:1px solid var(--line);padding:0;text-align:center;height:34px}
+th{font-weight:500;font-size:12px;background:var(--bg)}
+td.d,td.w{width:36px}
+tr.we td.d,tr.we td.w{background:var(--we)}
+tr.today td.d{box-shadow:inset 4px 0 0 var(--acc);font-weight:700}
+td.s{width:44px;cursor:pointer}
+.stamp{display:inline-grid;place-items:center;width:26px;height:26px;border:2px solid var(--stamp);color:var(--stamp);border-radius:50%;font-size:13px;font-weight:700}
+td input[type=time]{width:100%;border:0;background:transparent;color:var(--ink);font:inherit;text-align:center;padding:4px 2px;height:32px}
+td input[type=text]{width:100%;border:0;background:transparent;color:var(--ink);font:inherit;padding:4px 6px;height:32px}
+td.h{width:56px;font-variant-numeric:tabular-nums;color:var(--sub)}
+.sum{display:flex;gap:18px;justify-content:flex-end;margin-top:8px;font-size:14px}
+.hint{font-size:12px;color:var(--sub);margin:8px 2px}
+dialog{border:0;border-radius:8px;padding:18px;width:min(92vw,420px);background:var(--paper);color:var(--ink);border-top:8px solid var(--acc)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+dialog h2{margin:0 0 8px;font-size:18px}
+dialog input{width:100%;font:inherit;font-size:16px;padding:10px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink)}
+.frz{font-size:22px;font-variant-numeric:tabular-nums}
+.req{font-size:13px;color:var(--sub);margin:6px 0}
+.dbtn{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.dbtn button{font:inherit;padding:10px 16px;border-radius:5px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.dbtn #rsok{background:var(--acc);color:#1d2329;border-color:var(--acc);font-weight:700}
+.dbtn #rsok:disabled{opacity:.4;cursor:not-allowed}
+@media print{body{background:#fff}.punch,.bar,.hint{display:none}.sheet{border:0;padding:0}main{padding:0;max-width:none}:root{--bg:#fff;--paper:#fff;--ink:#000;--line:#000;--we:#bbb}.tw{overflow:visible}td input{color:#000}}
+</style>
+</head>
+<body>
+<main>
+  <section class="punch" aria-label="打刻">
+    <div class="app">道路維持出勤簿　R8年度</div>
+    <div class="clock"><b id="clk">--:--:--</b><span id="dt"></span></div>
+    <div class="btns">
+      <button id="bin" type="button">出社</button>
+      <button id="bkeep" type="button" hidden>道路維持<small>8:30</small></button>
+      <button id="bwater" type="button" hidden>水道<small>8:00</small></button>
+      <button id="bback" type="button" hidden>戻る</button>
+      <button id="bout" type="button">退社</button>
+      <button id="bokeep" type="button" hidden>道路維持<small>17:15</small></button>
+      <button id="bowater" type="button" hidden>水道<small>17:00</small></button>
+      <button id="boback" type="button" hidden>戻る</button>
+      <button id="bot" type="button">時間外<small>理由を入れて退社</small></button>
+    </div>
+    <div class="msg" id="msg" role="status"></div>
+  </section>
+
+  <div class="bar">
+    <select id="ym" aria-label="月を選ぶ"></select>
+    <button id="csv" type="button">CSVで保存</button>
+    <button id="exp" type="button">データ書き出し</button>
+    <button id="imp" type="button">データ読み込み</button>
+    <input id="impf" type="file" accept=".json,application/json" hidden>
+    <button id="prt" type="button">印刷</button>
+    <span class="sp"></span>
+    <button id="clr" type="button">この月をクリア</button>
+  </div>
+
+  <section class="sheet">
+    <div class="head">
+      <div class="m"><span id="mm"></span> 月</div>
+      <h1>出勤簿</h1>
+      <div>氏名：<input id="nm" value="松島 靖和" aria-label="氏名"></div>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>日</th><th>曜日</th><th>印</th><th>出社時間</th><th>退社時間</th><th>勤務内容</th><th>時間<br>(休憩除く)</th><th>時間外</th></tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+    <div class="sum"><span>出勤日数 <b id="sd">0</b> 日</span><span>合計 <b id="st">0:00</b></span><span>時間外 <b id="so">0:00</b></span></div>
+  </section>
+  <p class="hint">午前は「出社」を押すと「道路維持（8:30）」「水道（8:00）」のボタンが出ます。どちらかを押すと、出社時間と勤務内容（道路維持／水道）が入ります。それぞれの時刻を過ぎて押した場合は、押した時刻を5分単位に四捨五入して記録します。午後（12時以降）は赤の「退社」を押すと「道路維持（17:15）」「水道（17:00）」のボタンが出て、押すと退社時間が入ります。黄色の「時間外」は、押した時刻（5分単位）を退社時間にして、理由の入力が必要です（時間外の時間は、道路維持なら17:15、水道なら17:00を超えた分）。時刻・勤務内容は表で直接直せます。印の欄をタップすると押印。勤務時間は昼の休憩（12:00〜12:45）を差し引いて計算します。データはこのブラウザに保存されます。別の端末へ移すときは「データ書き出し」で保存したファイルを、移す先で「データ読み込み」してください（バックアップにも使えます）。</p>
+</main>
+<dialog id="dlg" aria-labelledby="dt2">
+  <h2 id="dt2">時間外の理由</h2>
+  <p><span id="dl">記録される退社時刻</span>：<b id="dh" class="frz"></b><span id="dn">（押した時刻で固定。入力中も進みません）</span></p>
+  <input id="rs" type="text" maxlength="60" placeholder="例：道路補修の緊急対応" aria-label="入力欄">
+  <p class="req" id="rq">理由を入力すると記録できます。</p>
+  <div class="dbtn"><button id="rsno" type="button">やめる</button><button id="rsok" type="button" disabled>記録する</button></div>
+</dialog>
+<script>
+const W=['日','月','火','水','木','金','土'];
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+let store={name:'松島 靖和',data:{}};
+try{const s=localStorage.getItem('shukkinbo-r8');if(s)store=JSON.parse(s)}catch(e){}
+function localSave(){try{localStorage.setItem('shukkinbo-r8',JSON.stringify(store))}catch(e){}}
+function save(){localSave()}
+// R8年度 = 2026年4月〜2027年3月
+const months=[];for(let i=0;i<12;i++){const m=(3+i)%12+1;months.push({y:2026+(3+i>11?1:0),m})}
+const now0=new Date();
+let cur=months.findIndex(o=>o.y===now0.getFullYear()&&o.m===now0.getMonth()+1);
+if(cur<0)cur=now0<new Date(2026,3,1)?0:11;
+$('ym').innerHTML=months.map((o,i)=>`<option value="${i}">${o.y}年${o.m}月</option>`).join('');
+$('ym').value=cur;$('ym').onchange=e=>{cur=+e.target.value;render()};
+$('nm').value=store.name;$('nm').oninput=e=>{store.name=e.target.value;save();render(true)};
+const key=(y,m,d)=>`${y}-${pad(m)}-${pad(d)}`;
+const rec=k=>store.data[k]||(store.data[k]={});
+function mins(r){if(!r||!r.in||!r.out)return null;const[a,b]=r.in.split(':'),[c,d]=r.out.split(':');const st=+a*60+ +b,en=+c*60+ +d;if(en<st)return null;return en-st-Math.max(0,Math.min(en,765)-Math.max(st,720))}
+function over(r){if(!r||!r.out)return 0;const[c,d]=r.out.split(':');return Math.max(0,+c*60+ +d-(r.type==='water'?1020:1035))}
+const fmt=t=>`${Math.floor(t/60)}:${pad(t%60)}`;
+function render(keepFocus){
+  const {y,m}=months[cur];const n=new Date(y,m,0).getDate();const td=new Date();
+  $('mm').textContent=m;let h='';
+  for(let d=1;d<=n;d++){
+    const k=key(y,m,d),r=store.data[k]||{},dow=new Date(y,m-1,d).getDay();
+    const isT=td.getFullYear()===y&&td.getMonth()+1===m&&td.getDate()===d;
+    const t=mins(r);
+    h+=`<tr class="${dow==0||dow==6?'we':''} ${isT?'today':''}" data-k="${k}"><td class="d">${d}</td><td class="w">${W[dow]}</td>
+    <td class="s" data-f="stamp" title="押印">${r.stamp?`<span class="stamp">${(store.name.trim()[0]||'印')}</span>`:''}</td>
+    <td><input type="time" data-f="in" value="${r.in||''}" aria-label="${d}日 出社"></td>
+    <td><input type="time" data-f="out" value="${r.out||''}" aria-label="${d}日 退社"></td>
+    <td><input type="text" data-f="note" value="${(r.note||'').replace(/"/g,'&quot;')}" aria-label="${d}日 勤務内容"></td>
+    <td class="h">${t===null?'':fmt(t)}</td><td class="h">${over(r)?fmt(over(r)):''}</td></tr>`;
+  }
+  $('tb').innerHTML=h;summary();
+}
+function summary(){
+  const {y,m}=months[cur];const n=new Date(y,m,0).getDate();let days=0,tot=0,ot=0;
+  for(let d=1;d<=n;d++){const r=store.data[key(y,m,d)];if(r&&(r.in||r.out))days++;const t=mins(r);if(t)tot+=t;ot+=over(r)}
+  $('sd').textContent=days;$('st').textContent=fmt(tot);$('so').textContent=fmt(ot);
+}
+$('tb').addEventListener('change',e=>{
+  const tr=e.target.closest('tr');if(!tr)return;const r=rec(tr.dataset.k);r[e.target.dataset.f]=e.target.value;save();
+  const hs=tr.querySelectorAll('.h');hs[0].textContent=(mins(r)===null?'':fmt(mins(r)));hs[1].textContent=over(r)?fmt(over(r)):'';summary();
+});
+$('tb').addEventListener('click',e=>{
+  const c=e.target.closest('td.s');if(!c)return;const r=rec(c.closest('tr').dataset.k);r.stamp=!r.stamp;save();
+  c.innerHTML=r.stamp?`<span class="stamp">${(store.name.trim()[0]||'印')}</span>`:'';
+});
+function setNote(r,text){const m=(r.note||'').match(/時間外：.*$/);r.note=text+(m?'／'+m[0]:'')}
+function finish(kind,t,idx,r,hm,reason){
+  if(kind==='in'||kind==='water')r.in=hm;else r.out=hm;
+  if(kind==='in'){setNote(r,'道路維持');r.type='road'}
+  if(kind==='water'){setNote(r,'水道');r.type='water'}
+  pick=false;pickO=false;ui();
+  if(kind==='ot'){r.note=(r.note||'').replace(/(／)?時間外：.*$/,'');const tag='時間外：'+reason;r.note=r.note?r.note+'／'+tag:tag}
+  r.stamp=true;save();cur=idx;$('ym').value=cur;render();
+  $('msg').textContent=`${t.getMonth()+1}月${t.getDate()}日 ${hm} に${kind==='in'?'道路維持の出社':kind==='water'?'水道の出社':kind==='out'?'道路維持の退社':kind==='owater'?'水道の退社':'時間外の退社'}を記録しました。`;
+}
+let pend=null;
+function openDlg(q){pend=q;const e=q.kind==='early';
+  $('dt2').textContent=e?'勤務内容':'時間外の理由';$('dl').textContent=e?'記録される出社時刻':'記録される退社時刻';
+  $('dn').textContent=e?'（8:00で固定）':'（押した時刻で固定。入力中も進みません）';
+  $('rq').textContent=e?'勤務内容を入力すると記録できます。':'理由を入力すると記録できます。';
+  $('rs').placeholder=e?'例：道路パトロール':'例：道路補修の緊急対応';
+  $('dh').textContent=q.hm;$('rs').value='';$('rsok').disabled=true;$('dlg').showModal();$('rs').focus()}
+function punch(kind){
+  const t=new Date();const idx=months.findIndex(o=>o.y===t.getFullYear()&&o.m===t.getMonth()+1);
+  if(idx<0){$('msg').textContent='R8年度（2026年4月〜2027年3月）の範囲外です。';return}
+  const k=key(t.getFullYear(),t.getMonth()+1,t.getDate()),r=rec(k);
+  let tm=Math.round((t.getHours()*60+t.getMinutes()+t.getSeconds()/60)/5)*5;
+  if(kind==='in'&&tm<510)tm=510;
+  if(kind==='water'&&tm<480)tm=480;
+  const ob=r.type==='water'?1020:1035;if(kind==='ot'&&tm<ob)tm=ob;
+  const hm=kind==='out'?'17:15':kind==='owater'?'17:00':`${pad(Math.floor(tm/60))}:${pad(tm%60)}`;
+  if(kind==='in'||kind==='water'){if(r.in&&!confirm(`出社時刻は ${r.in} で入力済みです。${hm} に更新しますか？`))return;return finish(kind,t,idx,r,hm)}
+  if(!r.in){$('msg').textContent='先に出社を押してください。';return}
+  if(r.out&&!confirm(`退社時刻は ${r.out} で入力済みです。${hm} に更新しますか？`))return;
+  if(kind==='out'||kind==='owater')return finish(kind,t,idx,r,hm);
+  openDlg({kind,t,idx,r,hm});
+}
+$('rs').oninput=()=>{$('rsok').disabled=!$('rs').value.trim()};
+$('rsok').onclick=()=>{const v=$('rs').value.trim();if(!pend||!v)return;const q=pend;pend=null;$('dlg').close();finish(q.kind,q.t,q.idx,q.r,q.hm,v)};
+$('rsno').onclick=()=>{pend=null;$('dlg').close();$('msg').textContent='記録は行いませんでした。'};
+$('bin').onclick=()=>{pick=true;ui()};$('bback').onclick=()=>{pick=false;ui()};$('bkeep').onclick=()=>punch('in');$('bwater').onclick=()=>punch('water');$('bout').onclick=()=>{pickO=true;ui()};$('boback').onclick=()=>{pickO=false;ui()};$('bokeep').onclick=()=>punch('out');$('bowater').onclick=()=>punch('owater');$('bot').onclick=()=>punch('ot');
+$('prt').onclick=()=>window.print();
+$('clr').onclick=()=>{const {y,m}=months[cur];if(!confirm(`${y}年${m}月の記録をすべて消しますか？`))return;
+  Object.keys(store.data).forEach(k=>{if(k.startsWith(`${y}-${pad(m)}-`))delete store.data[k]});save();render()};
+$('csv').onclick=()=>{
+  const {y,m}=months[cur];const n=new Date(y,m,0).getDate();
+  let s='日,曜日,出社時間,退社時間,勤務時間,時間外,勤務内容\n';
+  for(let d=1;d<=n;d++){const r=store.data[key(y,m,d)]||{},t=mins(r);
+    s+=[d,W[new Date(y,m-1,d).getDay()],r.in||'',r.out||'',t===null?'':fmt(t),over(r)?fmt(over(r)):'',`"${(r.note||'').replace(/"/g,'""')}"`].join(',')+'\n'}
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\ufeff'+encodeURIComponent(s);a.download=`出勤簿_${y}-${pad(m)}.csv`;a.click();
+};
+let pick=false,pickO=false;
+function ui(){const am=new Date().getHours()<12;$('bin').hidden=!am||pick;['bkeep','bwater','bback'].forEach(i=>$(i).hidden=!(am&&pick));$('bout').hidden=$('bot').hidden=am||pickO;['bokeep','bowater','boback'].forEach(i=>$(i).hidden=!(!am&&pickO))}
+function tick(){const t=new Date();$('clk').textContent=`${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`;
+  ui();
+  $('dt').textContent=`${t.getFullYear()}年${t.getMonth()+1}月${t.getDate()}日（${W[t.getDay()]}）`}
+tick();setInterval(tick,1000);render();
+// ---- データの書き出し／読み込み（端末の移行・バックアップ用） ----
+$('exp').onclick=()=>{
+  const b=new Blob([JSON.stringify({app:'douro-ishi-shukkinbo',version:1,name:store.name,data:store.data})],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  const t=new Date();a.download=`出勤簿データ_${t.getFullYear()}${pad(t.getMonth()+1)}${pad(t.getDate())}.json`;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+};
+$('imp').onclick=()=>$('impf').click();
+$('impf').onchange=e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{try{
+    const j=JSON.parse(rd.result);if(!j||j.app!=='douro-ishi-shukkinbo'||!j.data)throw 0;
+    const n=Object.keys(j.data).length;
+    if(!confirm(`${n}日分の記録を読み込みます。同じ日付の記録は読み込んだ内容で置き換わります。よろしいですか？`))return;
+    Object.assign(store.data,j.data);if(j.name)store.name=j.name;$('nm').value=store.name;save();render();
+    $('msg').textContent=`${n}日分の記録を読み込みました。`;
+  }catch(err){alert('このファイルは読み込めません。この出勤簿で書き出したファイルを選んでください。')}};
+  rd.readAsText(f);
+};
+</script>
+</body>
+</html>
